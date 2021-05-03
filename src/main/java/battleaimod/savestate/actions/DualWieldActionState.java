@@ -3,6 +3,7 @@ package battleaimod.savestate.actions;
 import basemod.ReflectionHacks;
 import battleaimod.savestate.CardState;
 import battleaimod.savestate.PlayerState;
+import battleaimod.savestate.selectscreen.IHandSelectActionState;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.actions.AbstractGameAction;
 import com.megacrit.cardcrawl.actions.unique.DualWieldAction;
@@ -16,7 +17,8 @@ import java.util.stream.Collectors;
 
 import static battleaimod.patches.MonsterPatch.shouldGoFast;
 
-public class DualWieldActionState implements ActionState{
+public class DualWieldActionState implements IHandSelectActionState
+{
     private final ArrayList<CardState> cannotDuplicate;
     private final int dupeAmount;
 
