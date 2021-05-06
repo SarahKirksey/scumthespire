@@ -6,14 +6,12 @@ import com.megacrit.cardcrawl.actions.AbstractGameAction;
 import com.megacrit.cardcrawl.actions.common.DiscardAction;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 
-public class DiscardActionState implements CurrentActionState, IHandSelectActionState {
+public class DiscardActionState implements IHandSelectActionState {
     private final int amount;
 
     public DiscardActionState(AbstractGameAction action) {
         this((DiscardCardActionFast) action);
     }
-
-    public final int amount;
     
     public DiscardActionState(DiscardAction action) {
         amount = action.amount;

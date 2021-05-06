@@ -7,7 +7,7 @@ import com.megacrit.cardcrawl.actions.AbstractGameAction;
 import com.megacrit.cardcrawl.actions.common.ExhaustAction;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 
-public class ExhaustActionState implements CurrentActionState, IHandSelectActionState {
+public class ExhaustActionState implements IHandSelectActionState {
     private final boolean isRandom;
     private final boolean anyNumber;
     private final boolean canPickZero;

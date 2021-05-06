@@ -16,7 +16,7 @@ public class SkillFromDeckToHandActionState implements IGridSelectActionState
     }
     
     @Override
-    public AbstractGameAction loadAction()
+    public AbstractGameAction loadCurrentAction()
     {
         throw new RuntimeException("SkillFromDeckToHandActionState is not yet implemented!");
     }

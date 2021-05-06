@@ -32,7 +32,7 @@ public class ExhumeActionState implements IGridSelectActionState
     }
 
     @Override
-    public ExhumeAction loadAction() {
+    public ExhumeAction loadCurrentAction() {
         ExhumeAction result = new ExhumeAction(upgrade);
         ArrayList<AbstractCard> cards = this.exhumes.stream().map(CardState::loadCard).collect(Collectors.toCollection(ArrayList::new));
         ReflectionHacks.setPrivate(result, ExhumeAction.class, "exhumes", cards);

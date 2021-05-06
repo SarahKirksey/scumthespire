@@ -11,7 +11,7 @@ import java.util.function.Function;
 
 public enum CurrentAction {
     ARMAMENTS_ACTION(ArmamentsAction.class, action -> new ArmamentsActionState(action)),
-    DISCARD_ACTION(DiscardAction.class, action -> new DiscardActionState(action)),
+    DISCARD_ACTION(DiscardAction.class, action -> new DiscardActionState((DiscardAction) action)),
     DISCARD_ACTION_FAST(DiscardCardActionFast.class, action -> new DiscardActionState(action)),
     DUAL_WIELD_ACTION(DualWieldAction.class, action -> new DualWieldActionState(action)),
     EXHAUST_ACTION(ExhaustAction.class, action -> new ExhaustActionState(action));

@@ -16,7 +16,7 @@ public class AttackFromDeckToHandActionState implements IGridSelectActionState
     }
     
     @Override
-    public AbstractGameAction loadAction()
+    public AbstractGameAction loadCurrentAction()
     {
         throw new RuntimeException("AttackFromDeckToHandActionState is not yet implemented!");
     }

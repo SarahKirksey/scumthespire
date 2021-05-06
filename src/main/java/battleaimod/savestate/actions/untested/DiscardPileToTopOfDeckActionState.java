@@ -25,7 +25,7 @@ public class DiscardPileToTopOfDeckActionState implements IGridSelectActionState
     }
 
     @Override
-    public DiscardPileToTopOfDeckAction loadAction() {
+    public DiscardPileToTopOfDeckAction loadCurrentAction() {
         return new DiscardPileToTopOfDeckAction(source);
     }
 

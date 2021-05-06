@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 import static battleaimod.patches.MonsterPatch.shouldGoFast;
 
-public class DualWieldActionState implements CurrentActionState, IHandSelectActionState {
+public class DualWieldActionState implements IHandSelectActionState {
     private final ArrayList<CardState> cannotDuplicate;
     private final int dupeAmount;
 
