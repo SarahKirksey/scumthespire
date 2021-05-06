@@ -1,12 +1,13 @@
 package battleaimod.savestate.actions;
 
 import basemod.ReflectionHacks;
+import battleaimod.savestate.selectscreen.IHandSelectActionState;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.actions.AbstractGameAction;
 import com.megacrit.cardcrawl.actions.common.ExhaustAction;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 
-public class ExhaustActionState implements CurrentActionState {
+public class ExhaustActionState implements CurrentActionState, IHandSelectActionState {
     private final boolean isRandom;
     private final boolean anyNumber;
     private final boolean canPickZero;

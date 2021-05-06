@@ -3,6 +3,7 @@ package battleaimod.savestate.actions;
 import basemod.ReflectionHacks;
 import battleaimod.savestate.CardState;
 import battleaimod.savestate.PlayerState;
+import battleaimod.savestate.selectscreen.IHandSelectActionState;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch;
 import com.megacrit.cardcrawl.actions.AbstractGameAction;
 import com.megacrit.cardcrawl.actions.unique.ArmamentsAction;
@@ -12,7 +13,7 @@ import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-public class ArmamentsActionState implements CurrentActionState {
+public class ArmamentsActionState implements CurrentActionState, IHandSelectActionState {
     private final ArrayList<CardState> cannotUpgrade;
     private final boolean upgraded;
 
