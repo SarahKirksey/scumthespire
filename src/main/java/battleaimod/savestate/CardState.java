@@ -30,13 +30,14 @@ public class CardState {
     private final boolean isCostModifiedForTurn;
     private final boolean isCostModified;
     private final boolean dontTriggerOnUseCard;
+    private final boolean exhaust;
 
-    private static HashMap<String, Stack<AbstractCard>> freeCards;
+    private static HashMap<String, HashSet<AbstractCard>> freeCards;
 
     private final UUID uuid;
 
     // Everything works without these, there is just s wonky 'draw' animation that can be avoided
-    // by setting all the physical properies right away
+    // by setting all the physical properties right away
     private final float current_x;
     private final float current_y;
     private final float target_x;
@@ -56,6 +57,7 @@ public class CardState {
         this.upgraded = card.upgraded;
         this.baseDamage = card.baseDamage;
         this.cost = card.cost;
+        this.exhaust = card.exhaust;
 
         this.costForTurn = card.costForTurn;
 
@@ -115,6 +117,7 @@ public class CardState {
         this.baseMagicNumber = parsed.get("base_magic_number").getAsInt();
         this.baseBlock = parsed.get("base_block").getAsInt();
         this.timesUpgraded = parsed.get("times_upgraded").getAsInt();
+        this.exhaust = parsed.get("exhaust").getAsBoolean();
 
         // TODO
         this.current_x = 0;
@@ -167,6 +170,7 @@ public class CardState {
         result.block = block;
         result.baseBlock = baseBlock;
         result.timesUpgraded = timesUpgraded;
+        result.exhaust = exhaust;
         result.dontTriggerOnUseCard = dontTriggerOnUseCard;
 
         if (BattleAiMod.battleAiController != null) {
@@ -202,6 +206,7 @@ public class CardState {
         cardStateJson.addProperty("base_magic_number", baseMagicNumber);
         cardStateJson.addProperty("base_block", baseBlock);
         cardStateJson.addProperty("times_upgraded", timesUpgraded);
+        cardStateJson.addProperty("exhaust", exhaust);
 
         return cardStateJson.toString();
     }
@@ -212,9 +217,14 @@ public class CardState {
 
     public static void freeCardList(List<AbstractCard> cards) {
         cards.forEach(CardState::freeCard);
+        cards.clear();
     }
 
     public static void freeCard(AbstractCard card) {
+        if (card == null) {
+            return;
+        }
+
         if (freeCards == null) {
             freeCards = new HashMap<>();
         }
@@ -222,7 +232,7 @@ public class CardState {
         String key = card.cardID;
 
         if (!freeCards.containsKey(key)) {
-            freeCards.put(key, new Stack<AbstractCard>());
+            freeCards.put(key, new HashSet<>());
         }
 
         if (freeCards.get(key).size() > 1000) {
@@ -238,15 +248,23 @@ public class CardState {
         Optional<AbstractCard> resultOptional = getCachedCard(key);
 
         AbstractCard result;
-        if (resultOptional.isPresent()) {
+        if (resultOptional.isPresent() && shouldGoFast()) {
             result = resultOptional.get();
             if (BattleAiMod.battleAiController != null) {
                 BattleAiMod.battleAiController.addRuntime("Card Cache Hit", 1);
+                if (BattleAiMod.battleAiController != null) {
+                    BattleAiMod.battleAiController.addRuntime("Card Cache Hit-Time", System
+                            .currentTimeMillis() - startMethod);
+                }
             }
         } else {
             result = getFreshCard(key);
             if (BattleAiMod.battleAiController != null) {
                 BattleAiMod.battleAiController.addRuntime("Card Cache Miss", 1);
+            }
+            if (BattleAiMod.battleAiController != null) {
+                BattleAiMod.battleAiController.addRuntime("Card Cache Miss-Time", System
+                        .currentTimeMillis() - startMethod);
             }
         }
 
@@ -264,26 +282,27 @@ public class CardState {
         if (freeCards == null || !freeCards.containsKey(key) || freeCards.get(key).isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(freeCards.get(key).pop());
+
+        Iterator<AbstractCard> iterator = freeCards.get(key).iterator();
+        AbstractCard result = iterator.next();
+        iterator.remove();
+
+        return Optional.of(result);
     }
 
     private static AbstractCard getFreshCard(String key) {
         return CardLibrary.getCard(key).makeCopy();
     }
-    
-    public static CardState makeNewCardState(AbstractCard card)
-    {
-        if(card!=null)
-        {
+
+    public static CardState makeNewCardState(AbstractCard card) {
+        if (card != null) {
             return new CardState(card);
         }
         return null;
     }
-    
-    public static AbstractCard loadCardFromState(CardState card)
-    {
-        if(card!=null)
-        {
+
+    public static AbstractCard loadCardFromState(CardState card) {
+        if (card != null) {
             return card.loadCard();
         }
         return null;

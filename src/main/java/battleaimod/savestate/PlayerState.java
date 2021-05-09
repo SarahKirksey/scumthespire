@@ -2,6 +2,7 @@ package battleaimod.savestate;
 
 import basemod.ReflectionHacks;
 import battleaimod.BattleAiMod;
+import battleaimod.savestate.orbs.OrbState;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -47,6 +48,9 @@ public class PlayerState extends CreatureState {
     public final ArrayList<CardState> exhaustPile;
     public final ArrayList<CardState> limbo;
 
+    public int maxOrbs;
+    public ArrayList<OrbState> orbs;
+
     public final ArrayList<PotionState> potions;
 
     private final ArrayList<RelicState> relics;
@@ -84,6 +88,11 @@ public class PlayerState extends CreatureState {
         }
 
 
+        this.orbs = player.orbs.stream()
+                               .map(orb -> BattleAiMod.orbByClassMap.get(orb.getClass()).factory
+                                       .apply(orb))
+                               .collect(Collectors.toCollection(ArrayList::new));
+
         this.potions = player.potions.stream().map(PotionState::new)
                                      .collect(Collectors.toCollection(ArrayList::new));
 
@@ -102,6 +111,7 @@ public class PlayerState extends CreatureState {
 
         this.inspectHb = player.inspectHb == null ? null : new HitboxState(player.inspectHb);
         this.damagedThisCombat = player.damagedThisCombat;
+        this.maxOrbs = player.maxOrbs;
 
 
         this.title = player.title;
@@ -145,6 +155,11 @@ public class PlayerState extends CreatureState {
         this.potions = new ArrayList<>();
         parsed.get("potions").getAsJsonArray().forEach(potionElement -> this.potions
                 .add(new PotionState(potionElement.getAsString())));
+
+        this.maxOrbs = parsed.get("max_orbs").getAsInt();
+        this.orbs = new ArrayList<>();
+        parsed.get("orbs").getAsJsonArray().forEach(orbElement -> this.orbs
+                .add(OrbState.forJsonString(orbElement.getAsString())));
 
         //TODO
         this.isDead = false;
@@ -225,6 +240,9 @@ public class PlayerState extends CreatureState {
             player.potions.get(i).setAsObtained(i);
         }
 
+        player.orbs = this.orbs.stream().map(OrbState::loadOrb)
+                               .collect(Collectors.toCollection(ArrayList::new));
+
         player.energy.energy = this.energyManagerEnergy;
         player.energy.energyMaster = this.energyManagerMaxMaster;
         EnergyPanel.setEnergy(this.energyManagerEnergy);
@@ -236,12 +254,16 @@ public class PlayerState extends CreatureState {
         player.inspectHb = this.inspectHb == null ? null : this.inspectHb.loadHitbox();
         player.damagedThisCombat = this.damagedThisCombat;
         player.title = this.title;
+        player.maxOrbs = this.maxOrbs;
 
         ReflectionHacks
                 .setPrivate(player, AbstractPlayer.class, "renderCorpse", this.renderCorpse);
 
 
-        if(!shouldGoFast()) {
+        if (!shouldGoFast()) {
+            for(int i = 0; i < player.orbs.size(); i++) {
+                player.orbs.get(i).setSlot(i, player.maxOrbs);
+            }
             player.update();
         }
 
@@ -308,12 +330,19 @@ public class PlayerState extends CreatureState {
 
         playerStateJson.addProperty("relics", relics.stream().map(RelicState::encode)
                                                     .collect(Collectors.joining(RELIC_DELIMETER)));
+        playerStateJson.addProperty("max_orbs", maxOrbs);
 
         JsonArray potionArray = new JsonArray();
         for (PotionState potion : potions) {
             potionArray.add(potion.encode());
         }
         playerStateJson.add("potions", potionArray);
+
+        JsonArray orbArray = new JsonArray();
+        for (OrbState orb : orbs) {
+            orbArray.add(orb.encode());
+        }
+        playerStateJson.add("orbs", orbArray);
 
         return playerStateJson.toString();
     }

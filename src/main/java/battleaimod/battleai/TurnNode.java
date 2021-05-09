@@ -5,7 +5,7 @@ import battleaimod.battleai.commands.Command;
 import battleaimod.battleai.commands.EndCommand;
 import battleaimod.battleai.commands.StateDebugInfo;
 import battleaimod.savestate.PotionState;
-import battleaimod.savestate.PowerState;
+import battleaimod.savestate.powers.PowerState;
 import battleaimod.savestate.SaveState;
 
 import java.util.ArrayList;
@@ -76,7 +76,7 @@ public class TurnNode implements Comparable<TurnNode> {
             curState.saveState = new SaveState();
         }
 
-        if(curState.getPlayerHealth() < 1) {
+        if (curState.getPlayerHealth() < 1) {
             controller.deathNode = curState;
             isDone = true;
             return true;
@@ -118,8 +118,9 @@ public class TurnNode implements Comparable<TurnNode> {
                     }
 
                 } else {
-                    if (controller.backupTurn == null || (toAdd
-                            .isBetterThan(controller.backupTurn)) && controller.backupTurn.startingState.saveState.turn <= toAdd.startingState.saveState.turn) {
+                    if (controller.backupTurn == null ||
+                            controller.backupTurn.startingState.saveState.turn < toAdd.startingState.saveState.turn ||
+                            (toAdd.isBetterThan(controller.backupTurn)) && controller.backupTurn.startingState.saveState.turn == toAdd.startingState.saveState.turn) {
                         controller.backupTurn = toAdd;
                     }
 //                    System.err.println("adding " + toAdd);
@@ -232,6 +233,12 @@ public class TurnNode implements Comparable<TurnNode> {
                                                                                   .equals("Barricade"))
                                                                           .findAny().isPresent()) {
                                                             return monster.currentHealth + monster.currentBlock;
+                                                        } else if (monster.powers.stream()
+                                                                                 .filter(power -> power.powerId
+                                                                                         .equals("Unawakened"))
+                                                                                 .findAny()
+                                                                                 .isPresent()) {
+                                                            return monster.currentHealth + monster.maxHealth;
                                                         }
                                                         return monster.currentHealth;
                                                     })
@@ -240,7 +247,6 @@ public class TurnNode implements Comparable<TurnNode> {
     }
 
     public static int caclculateTurnScore(TurnNode turnNode) {
-//        System.err.println(getPotionScore(turnNode.startingState.saveState));
         int playerDamage = getPlayerDamage(turnNode);
         int monsterDamage = getTotalMonsterHealth(turnNode.controller.startingState) - getTotalMonsterHealth(turnNode.startingState.saveState);
 
@@ -266,7 +272,6 @@ public class TurnNode implements Comparable<TurnNode> {
         int result = getTurnScore(otherTurn) - getTurnScore(this);
 
         controller.addRuntime("Comparing Turns", System.currentTimeMillis() - startCompare);
-
         controller.addRuntime("Comparing Turns instance", 1);
 
         return result;

@@ -3,7 +3,7 @@ package battleaimod.battleai;
 import basemod.ReflectionHacks;
 import battleaimod.battleai.commands.*;
 import battleaimod.savestate.PotionState;
-import battleaimod.savestate.PowerState;
+import battleaimod.savestate.powers.PowerState;
 import battleaimod.savestate.SaveState;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.red.TwinStrike;
@@ -14,7 +14,9 @@ import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.potions.AbstractPotion;
 import com.megacrit.cardcrawl.potions.PotionSlot;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
+import com.megacrit.cardcrawl.screens.select.GridCardSelectScreen;
 import com.megacrit.cardcrawl.ui.buttons.CardSelectConfirmButton;
+import com.megacrit.cardcrawl.ui.buttons.GridSelectConfirmButton;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -61,6 +63,13 @@ public class StateNode {
                 AbstractDungeon.getCurrRoom().phase == AbstractRoom.RoomPhase.COMBAT &&
                 AbstractDungeon.isScreenUp &&
                 AbstractDungeon.screen == AbstractDungeon.CurrentScreen.HAND_SELECT;
+    }
+    
+    public static boolean isGridSelect() {
+        return isInDungeon() &&
+                   AbstractDungeon.getCurrRoom().phase == AbstractRoom.RoomPhase.COMBAT &&
+                   AbstractDungeon.isScreenUp &&
+                   AbstractDungeon.screen == AbstractDungeon.CurrentScreen.GRID;
     }
 
     private static boolean isEndCommandAvailable() {
@@ -219,6 +228,20 @@ public class StateNode {
                 commands.add(HandSelectConfirmCommand.INSTANCE);
             }
         }
+    
+        if (isGridSelect()) {
+            if (AbstractDungeon.gridSelectScreen.selectedCards.size() <
+                    (int) (ReflectionHacks.getPrivate(AbstractDungeon.gridSelectScreen, GridCardSelectScreen.class, "numCards"))) {
+                for (int i = 0; i < AbstractDungeon.player.hand.size(); i++) {
+                    commands.add(new GridSelectCommand(i));
+                }
+//                throw new IllegalStateException("blah blah grid");
+            }
+        
+            if (isGridSelectConfirmButtonEnabled()) {
+                commands.add(GridSelectConfirmCommand.INSTANCE);
+            }
+        }
 
         if (isEndCommandAvailable()) {
             commands.add(new EndCommand());
@@ -260,6 +283,14 @@ public class StateNode {
         CardSelectConfirmButton button = AbstractDungeon.handCardSelectScreen.button;
         boolean isHidden = ReflectionHacks
                 .getPrivate(button, CardSelectConfirmButton.class, "isHidden");
+        boolean isDisabled = button.isDisabled;
+        return !(isHidden || isDisabled);
+    }
+    
+    private static boolean isGridSelectConfirmButtonEnabled() {
+        GridSelectConfirmButton button = AbstractDungeon.gridSelectScreen.confirmButton;
+        boolean isHidden = ReflectionHacks
+                               .getPrivate(button, CardSelectConfirmButton.class, "isHidden");
         boolean isDisabled = button.isDisabled;
         return !(isHidden || isDisabled);
     }

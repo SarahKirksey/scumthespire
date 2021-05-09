@@ -1,6 +1,5 @@
 package battleaimod.savestate;
 
-import basemod.ReflectionHacks;
 import battleaimod.BattleAiMod;
 import battleaimod.GameStateListener;
 import battleaimod.battleai.BattleAiController;
@@ -8,12 +7,14 @@ import battleaimod.savestate.selectscreen.SelectScreenState;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.megacrit.cardcrawl.actions.GameActionManager;
+import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.CardQueueItem;
-import com.megacrit.cardcrawl.core.AbstractCreature;
+import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
-import com.megacrit.cardcrawl.powers.ConstrictedPower;
 import com.megacrit.cardcrawl.rooms.AbstractRoom;
+
+import java.util.ArrayList;
 
 import static battleaimod.patches.MonsterPatch.shouldGoFast;
 
@@ -24,12 +25,17 @@ public class SaveState {
     boolean myTurn = false;
     public int turn;
     public String encounterName;
+    private int totalDiscardedThisTurn;
+    private final ArrayList<Integer> cardsPlayedThisTurn;
+
+    // Load cards from scratch if necessary, ideally they'll be released elsewhere
+    private final ArrayList<CardState> cardsPlayedThisTurnBackup;
 
     AbstractRoom.RoomPhase previousPhase = null;
     AbstractDungeon.CurrentScreen screen;
     AbstractDungeon.CurrentScreen previousScreen = null;
 
-    //    ListState listState;
+    ListState listState;
     public PlayerState playerState;
     private final SelectScreenState selectScreenState;
     RngState rngState;
@@ -63,7 +69,7 @@ public class SaveState {
 
         screen = AbstractDungeon.screen;
         rngState = new RngState();
-//        listState = new ListState();
+        listState = new ListState();
         floorNum = AbstractDungeon.floorNum;
 
         this.turn = GameActionManager.turn;
@@ -74,6 +80,34 @@ public class SaveState {
         myTurn = GameStateListener.myTurn;
         encounterName = BattleAiController.currentEncounter;
         this.ascensionLevel = AbstractDungeon.ascensionLevel;
+        this.totalDiscardedThisTurn = GameActionManager.totalDiscardedThisTurn;
+
+        ArrayList<AbstractCard> allCards = new ArrayList<>();
+
+        AbstractPlayer player = AbstractDungeon.player;
+
+        allCards.addAll(player.masterDeck.group);
+        allCards.addAll(player.drawPile.group);
+        allCards.addAll(player.hand.group);
+        allCards.addAll(player.discardPile.group);
+        allCards.addAll(player.exhaustPile.group);
+        allCards.addAll(player.limbo.group);
+
+        this.cardsPlayedThisTurn = new ArrayList<>();
+        this.cardsPlayedThisTurnBackup = new ArrayList<>();
+
+        AbstractDungeon.actionManager.cardsPlayedThisTurn
+                .forEach(card -> {
+                    int index = allCards.indexOf(card);
+                    if (index == -1) {
+                        this.cardsPlayedThisTurnBackup.add(new CardState(card));
+                    } else {
+                        this.cardsPlayedThisTurn.add(allCards.indexOf(card));
+                    }
+                });
+
+//        this.cardsPlayedThisTurn = PlayerState
+//                .toCardStateArray(AbstractDungeon.actionManager.cardsPlayedThisTurn);
 
         if (BattleAiMod.battleAiController != null) {
             BattleAiMod.battleAiController
@@ -86,6 +120,8 @@ public class SaveState {
     }
 
     public SaveState(String jsonString) {
+        System.err.println("beginning parse....");
+
         JsonObject parsed = new JsonParser().parse(jsonString).getAsJsonObject();
 
         this.floorNum = parsed.get("floor_num").getAsInt();
@@ -103,30 +139,37 @@ public class SaveState {
         this.encounterName = parsed.get("encounter_name").isJsonNull() ? null : parsed
                 .get("encounter_name").getAsString();
 
-//        this.listState = new ListState(parsed.get("list_state").getAsString());
+        this.listState = new ListState(parsed.get("list_state").getAsString());
+
+        System.err.println("parsing player....");
+
         this.playerState = new PlayerState(parsed.get("player_state").getAsString());
         this.rngState = new RngState(parsed.get("rng_state").getAsString());
+
+        System.err.println("parsing room....");
 
         this.curMapNodeState = new MapRoomNodeState(parsed.get("cur_map_node_state").getAsString());
         this.isScreenUp = parsed.get("is_screen_up").getAsBoolean();
         this.ascensionLevel = parsed.get("ascension_level").getAsInt();
 
         // TODO
-        handSelectScreenState = null;
+        selectScreenState = null;
+        this.cardsPlayedThisTurn = new ArrayList<>();
+        this.cardsPlayedThisTurnBackup = new ArrayList<>();
     }
 
     public void loadState() {
         long loadStartTime = System.currentTimeMillis();
-//        AbstractDungeon.actionManager.cardQueue.clear();
+
         AbstractDungeon.actionManager.currentAction = null;
         AbstractDungeon.actionManager.actions.clear();
-
 
         AbstractDungeon.ascensionLevel = this.ascensionLevel;
         GameActionManager.turn = this.turn;
 
         long loadPlayerStartTime = System.currentTimeMillis();
 
+//        CardState.freeCardList(AbstractDungeon.actionManager.cardsPlayedThisTurn);
         AbstractDungeon.player = playerState.loadPlayer();
 
         if (BattleAiMod.battleAiController != null) {
@@ -145,25 +188,14 @@ public class SaveState {
                     .currentTimeMillis() - point2);
         }
 
-        for (int i = 0; i < playerState.powers.size(); i++) {
-            if (playerState.powers.get(i).powerId.equals("Constricted")) {
-                AbstractCreature source = AbstractDungeon.getMonsters().monsters
-                        .get(playerState.powers.get(i).constrictedSourceIndex);
-                ReflectionHacks.setPrivate(AbstractDungeon.player.powers
-                        .get(i), ConstrictedPower.class, "source", source);
-            }
-        }
-
-
         AbstractDungeon.isScreenUp = isScreenUp;
         AbstractDungeon.screen = screen;
 
 //        AbstractDungeon.isScreenUp = false;
-//        listState.loadLists();
+        listState.loadLists();
 
         AbstractDungeon.dungeonMapScreen.close();
 
-//        AbstractDungeon.screen = AbstractDungeon.CurrentScreen.NONE;
 
         AbstractDungeon.floorNum = floorNum;
 
@@ -174,6 +206,7 @@ public class SaveState {
         GameStateListener.previousPhase = previousPhase;
         GameStateListener.myTurn = myTurn;
         GameStateListener.externalChange = true;
+        GameActionManager.totalDiscardedThisTurn = totalDiscardedThisTurn;
 
         if (BattleAiMod.battleAiController != null) {
             BattleAiMod.battleAiController.loadstateTime += (System
@@ -193,6 +226,30 @@ public class SaveState {
         if (!shouldGoFast() && !isScreenUp) {
             CombatRewardScreenState.loadCombatRewardScreen();
         }
+
+        ArrayList<AbstractCard> allCards = new ArrayList<>();
+
+        AbstractPlayer player = AbstractDungeon.player;
+
+        allCards.addAll(player.masterDeck.group);
+        allCards.addAll(player.drawPile.group);
+        allCards.addAll(player.hand.group);
+        allCards.addAll(player.discardPile.group);
+        allCards.addAll(player.exhaustPile.group);
+        allCards.addAll(player.limbo.group);
+
+        AbstractDungeon.actionManager.cardsPlayedThisTurn.clear();
+
+        this.cardsPlayedThisTurn.forEach(index -> AbstractDungeon.actionManager.cardsPlayedThisTurn
+                .add(allCards.get(index)));
+        this.cardsPlayedThisTurnBackup
+                .forEach(card -> AbstractDungeon.actionManager.cardsPlayedThisTurn
+                        .add(card.loadCard()));
+
+//        AbstractDungeon.actionManager.cardsPlayedThisTurn = this.cardsPlayedThisTurn.stream()
+//                                                                                    .map(CardState::loadCard)
+//                                                                                    .collect(Collectors
+//                                                                                            .toCollection(ArrayList::new));
 
         AbstractDungeon.getCurrRoom().monsters.monsters.forEach(AbstractMonster::applyPowers);
         AbstractDungeon.player.hand.applyPowers();
@@ -233,7 +290,7 @@ public class SaveState {
         saveStateJson.addProperty("screen_name", screen.name());
         saveStateJson.addProperty("previous_screen_name", previousScreen.name());
 
-//        saveStateJson.addProperty("list_state", listState.encode());
+        saveStateJson.addProperty("list_state", listState.encode());
         saveStateJson.addProperty("player_state", playerState.encode());
         saveStateJson.addProperty("rng_state", rngState.encode());
 

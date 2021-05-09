@@ -9,8 +9,12 @@ import battleaimod.battleai.commands.CardCommand;
 import battleaimod.fastobjects.ScreenShakeFast;
 import battleaimod.networking.AiClient;
 import battleaimod.networking.AiServer;
-import battleaimod.savestate.Monster;
 import battleaimod.savestate.SaveState;
+import battleaimod.savestate.actions.Action;
+import battleaimod.savestate.actions.CurrentAction;
+import battleaimod.savestate.monsters.Monster;
+import battleaimod.savestate.orbs.Orb;
+import battleaimod.savestate.powers.Power;
 import com.badlogic.gdx.graphics.Texture;
 import com.evacipated.cardcrawl.modthespire.Loader;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
@@ -49,8 +53,15 @@ public class BattleAiMod implements PostInitializeSubscriber, PostUpdateSubscrib
     public static boolean goFast = false;
     public static boolean shouldStartClient = false;
     public static long logCounter = 0;
+    public static boolean isServer;
 
     public static HashMap<String, Monster> monsterByIdmap;
+    public static HashMap<String, Power> powerByIdmap;
+
+    public static HashMap<Class, Action> actionByClassMap;
+    public static HashMap<Class, CurrentAction> currentActionByClassMap;
+
+    public static HashMap<Class, Orb> orbByClassMap;
 
     public BattleAiMod() {
         BaseMod.subscribe(this);
@@ -87,7 +98,7 @@ public class BattleAiMod implements PostInitializeSubscriber, PostUpdateSubscrib
             if (battleAiController.isDone) {
                 battleAiController = null;
             }
-        } else if(!BattleAiController.shouldStep()) {
+        } else if (!BattleAiController.shouldStep()) {
             System.err.println("Can't step yet");
         }
     }
@@ -95,8 +106,29 @@ public class BattleAiMod implements PostInitializeSubscriber, PostUpdateSubscrib
     public static void initialize() {
         BattleAiMod mod = new BattleAiMod();
         monsterByIdmap = new HashMap<>();
+        powerByIdmap = new HashMap<>();
+        actionByClassMap = new HashMap<>();
+        currentActionByClassMap = new HashMap<>();
+        orbByClassMap = new HashMap<>();
+
         for (Monster monster : Monster.values()) {
             monsterByIdmap.put(monster.monsterId, monster);
+        }
+
+        for (Power power : Power.values()) {
+            powerByIdmap.put(power.powerId, power);
+        }
+
+        for (Action action : Action.values()) {
+            actionByClassMap.put(action.actionClass, action);
+        }
+
+        for (CurrentAction action : CurrentAction.values()) {
+            currentActionByClassMap.put(action.actionClass, action);
+        }
+
+        for (Orb orb : Orb.values()) {
+            orbByClassMap.put(orb.orbClass, orb);
         }
     }
 
@@ -128,12 +160,10 @@ public class BattleAiMod implements PostInitializeSubscriber, PostUpdateSubscrib
 
     public void receivePostInitialize() {
         String isServerFlag = System.getProperty("isServer");
-        boolean isServer = false;
-
 
         if (isServerFlag != null) {
             if (Boolean.parseBoolean(isServerFlag)) {
-                isServer = true;
+                BattleAiMod.isServer = true;
 
             }
         }
