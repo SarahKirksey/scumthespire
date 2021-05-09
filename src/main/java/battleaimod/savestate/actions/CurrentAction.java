@@ -2,11 +2,13 @@ package battleaimod.savestate.actions;
 
 import battleaimod.fastobjects.actions.DiscardCardActionFast;
 import battleaimod.savestate.actions.untested.AttackFromDeckToHandActionState;
+import battleaimod.savestate.actions.untested.BetterDrawPileToHandActionState;
 import battleaimod.savestate.actions.untested.DiscardPileToTopOfDeckActionState;
 import battleaimod.savestate.actions.untested.ExhumeActionState;
 import battleaimod.savestate.actions.untested.SeekActionState;
 import battleaimod.savestate.actions.untested.SkillFromDeckToHandActionState;
 import com.megacrit.cardcrawl.actions.AbstractGameAction;
+import com.megacrit.cardcrawl.actions.common.BetterDrawPileToHandAction;
 import com.megacrit.cardcrawl.actions.common.DiscardAction;
 import com.megacrit.cardcrawl.actions.common.ExhaustAction;
 import com.megacrit.cardcrawl.actions.defect.SeekAction;
@@ -23,6 +25,7 @@ public enum CurrentAction {
     ARMAMENTS_ACTION(ArmamentsAction.class, ArmamentsActionState::new),
     DISCARD_ACTION(DiscardAction.class, action -> new DiscardActionState((DiscardAction) action)),
     DISCARD_ACTION_FAST(DiscardCardActionFast.class, DiscardActionState::new),
+    DRAW_PILE_TO_HAND_ACTION(BetterDrawPileToHandAction.class, BetterDrawPileToHandActionState::new),
     DREDGE_ACTION(DiscardPileToTopOfDeckAction .class, DiscardPileToTopOfDeckActionState::new),
     DUAL_WIELD_ACTION(DualWieldAction.class, DualWieldActionState::new),
     EXHAUST_ACTION(ExhaustAction.class, ExhaustActionState::new),

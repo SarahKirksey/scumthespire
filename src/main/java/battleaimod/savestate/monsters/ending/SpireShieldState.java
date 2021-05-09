@@ -18,7 +18,7 @@ public class SpireShieldState extends MonsterState {
         this.moveCount = ReflectionHacks
                 .getPrivate(monster, SpireShield.class, "moveCount");
 
-        monsterTypeNumber = Monster.SPIRE_SHIELD.ordinal();
+        //monsterTypeNumber = Monster.SPIRE_SHIELD.ordinal();
     }
 
     public SpireShieldState(String jsonString) {
@@ -28,7 +28,7 @@ public class SpireShieldState extends MonsterState {
 
         this.moveCount = parsed.get("moveCount").getAsInt();
 
-        monsterTypeNumber = Monster.SPIRE_SHIELD.ordinal();
+        //monsterTypeNumber = Monster.SPIRE_SHIELD.ordinal();
     }
 
     @Override

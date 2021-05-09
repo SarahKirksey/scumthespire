@@ -43,7 +43,7 @@ public class CorruptHeartState extends MonsterState {
         moveCount = ReflectionHacks.getPrivate(monster, CorruptHeart.class, "moveCount");
         buffCount = ReflectionHacks.getPrivate(monster, CorruptHeart.class, "buffCount");
 
-        monsterTypeNumber = Monster.CORRUPT_HEART.ordinal();
+        //monsterTypeNumber = Monster.CORRUPT_HEART.ordinal();
     }
 
     public CorruptHeartState(String jsonString) {
@@ -57,7 +57,7 @@ public class CorruptHeartState extends MonsterState {
         this.moveCount = parsed.get("moveCount").getAsInt();
         this.buffCount = parsed.get("buffCount").getAsInt();
 
-        monsterTypeNumber = Monster.HEXAGHOST.ordinal();
+        //monsterTypeNumber = Monster.CORRUPT_HEART.ordinal();
     }
 
     @Override

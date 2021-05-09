@@ -1,6 +1,9 @@
 package battleaimod.savestate;
 
+import basemod.ReflectionHacks;
 import battleaimod.BattleAiMod;
+import com.badlogic.gdx.graphics.Color;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.megacrit.cardcrawl.cards.AbstractCard;
@@ -118,7 +121,7 @@ public class CardState {
         this.baseBlock = parsed.get("base_block").getAsInt();
         this.timesUpgraded = parsed.get("times_upgraded").getAsInt();
         this.exhaust = parsed.get("exhaust").getAsBoolean();
-
+        
         // TODO
         this.current_x = 0;
         this.current_y = 0;
@@ -172,11 +175,8 @@ public class CardState {
         result.timesUpgraded = timesUpgraded;
         result.exhaust = exhaust;
         result.dontTriggerOnUseCard = dontTriggerOnUseCard;
-
-        if (BattleAiMod.battleAiController != null) {
-            BattleAiMod.battleAiController.addRuntime("Load Time load Card Complete", System
-                    .currentTimeMillis() - loadState);
-        }
+        
+        ReflectionHacks.setPrivate(result, AbstractCard.class, "tintColor", new Color(0));
 
         return result;
     }

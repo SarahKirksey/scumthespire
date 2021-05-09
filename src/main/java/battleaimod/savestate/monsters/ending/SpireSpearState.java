@@ -26,7 +26,7 @@ public class SpireSpearState extends MonsterState {
         this.moveCount = ReflectionHacks.getPrivate(monster, SpireSpear.class, "moveCount");
         this.skewerCount = ReflectionHacks.getPrivate(monster, SpireSpear.class, "skewerCount");
 
-        monsterTypeNumber = Monster.SPIRE_SPEAR.ordinal();
+        //monsterTypeNumber = Monster.SPIRE_SPEAR.ordinal();
     }
 
     public SpireSpearState(String jsonString) {
@@ -37,7 +37,7 @@ public class SpireSpearState extends MonsterState {
         this.moveCount = parsed.get("moveCount").getAsInt();
         this.skewerCount = parsed.get("skewerCount").getAsInt();
 
-        monsterTypeNumber = Monster.SPIRE_SPEAR.ordinal();
+        //monsterTypeNumber = Monster.SPIRE_SPEAR.ordinal();
     }
 
     @Override
