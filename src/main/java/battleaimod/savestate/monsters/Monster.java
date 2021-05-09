@@ -2,6 +2,7 @@ package battleaimod.savestate.monsters;
 
 import battleaimod.savestate.monsters.beyond.*;
 import battleaimod.savestate.monsters.city.*;
+import battleaimod.savestate.monsters.ending.*;
 import battleaimod.savestate.monsters.exordium.*;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 
@@ -75,6 +76,14 @@ public enum Monster {
     REPTOMANCER("Reptomancer", monster -> new ReptomancerState(monster), json -> new ReptomancerState(json)),
     SNAKE_DAGGER("Dagger", monster -> new SnakerDaggerState(monster), json -> new SnakerDaggerState(json)),
     TIME_EATER("TimeEater", monster -> new TimeEaterState(monster), json -> new TimeEaterState(json))
+    
+    // Ending
+    // CORRUPT_HEART("CorruptHeart", monster -> new CorruptHeartState(monster), json -> new CorruptHeartState(json)),
+    // SPIRE_SHIELD("SpireShield", monster -> new SpireShieldState(monster), json -> new SpireShieldState(json)),
+    // SPIRE_SPEAR("SpireSpear", monster-> new SpireSpearState(monster), json->new SpireSpearState(json))
+    
+    // ??? (Modded, most likely)
+    // , UNKNOWN(null, monster -> new UnknownMonsterState(monster), json -> new UnknownMonsterState(json))
     ;
 
     public final String monsterId;

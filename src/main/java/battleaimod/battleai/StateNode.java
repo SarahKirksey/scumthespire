@@ -290,7 +290,7 @@ public class StateNode {
     private static boolean isGridSelectConfirmButtonEnabled() {
         GridSelectConfirmButton button = AbstractDungeon.gridSelectScreen.confirmButton;
         boolean isHidden = ReflectionHacks
-                               .getPrivate(button, CardSelectConfirmButton.class, "isHidden");
+                               .getPrivate(button, GridSelectConfirmButton.class, "isHidden");
         boolean isDisabled = button.isDisabled;
         return !(isHidden || isDisabled);
     }
