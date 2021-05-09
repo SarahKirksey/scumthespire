@@ -34,6 +34,8 @@ public enum Monster {
     SPIKE_SLIME_M("SpikeSlime_M", monster -> new SpikeSlime_MState(monster), json -> new SpikeSlime_MState(json)),
     SPIKE_SLIME_S("SpikeSlime_S", monster -> new SpikeSlime_SState(monster), json -> new SpikeSlime_SState(json)),
     THE_GUARDIAN("TheGuardian", monster -> new TheGuardianState(monster), json -> new TheGuardianState(json)),
+    
+    // City
     CHOSEN("Chosen", monster -> new ChosenState(monster), json -> new ChosenState(json)),
     MUGGER("Mugger", monster -> new MuggerState(monster), json -> new MuggerState(json)),
     SHELLED_PARASITE("Shelled Parasite", monster -> new ShelledParasiteState(monster), json -> new ShelledParasiteState(json)),

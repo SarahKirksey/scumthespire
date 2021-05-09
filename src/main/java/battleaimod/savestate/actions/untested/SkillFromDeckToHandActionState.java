@@ -6,18 +6,20 @@ import com.megacrit.cardcrawl.actions.unique.SkillFromDeckToHandAction;
 
 public class SkillFromDeckToHandActionState implements IGridSelectActionState
 {
+    private final int amount;
+    
     public SkillFromDeckToHandActionState(AbstractGameAction action) {
         this((SkillFromDeckToHandAction) action);
     }
-
+    
     public SkillFromDeckToHandActionState(SkillFromDeckToHandAction action)
     {
-        throw new RuntimeException("SkillFromDeckToHandActionState is not yet implemented!");
+        this.amount = action.amount;
     }
     
     @Override
     public AbstractGameAction loadCurrentAction()
     {
-        throw new RuntimeException("SkillFromDeckToHandActionState is not yet implemented!");
+        return new SkillFromDeckToHandAction(this.amount);
     }
 }
