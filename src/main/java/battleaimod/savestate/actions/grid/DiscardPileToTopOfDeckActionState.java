@@ -34,33 +34,4 @@ public class DiscardPileToTopOfDeckActionState implements ActionState
     public DiscardPileToTopOfDeckAction loadAction() {
         return new DiscardPileToTopOfDeckAction(source);
     }
-
-    @SpirePatch(
-            clz = DiscardPileToTopOfDeckAction.class,
-            method = SpirePatch.CONSTRUCTOR,
-            paramtypez = {AbstractCreature.class}
-    )
-    public static class NoFxConstructorPatchOther {
-        public static void Postfix(DiscardPileToTopOfDeckAction _instance, AbstractCreature source) {
-            // I don't know if this patch is necessary.
-            if (shouldGoFast()) {
-                ReflectionHacks
-                        .setPrivate(_instance, AbstractGameAction.class, "duration", Settings.ACTION_DUR_FAST);
-            }
-        }
-    }
-
-    @SpirePatch(
-            clz = DiscardPileToTopOfDeckAction.class,
-            paramtypez = {},
-            method = "update"
-    )
-    public static class NoDoubleExhumePatch {
-        public static void Postfix(DiscardPileToTopOfDeckAction _instance) {
-            // Force the action to stay in the the manager until cards are selected
-            if (AbstractDungeon.isScreenUp) {   // TODO I guess? Not really sure.
-                _instance.isDone = false;
-            }
-        }
-    }
 }
